@@ -24,6 +24,8 @@
     "supertest": "^6.3.3",
     "ts-jest": "^29.0.5",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.0.2"
-  }
+    "typescript": "^5.0.4"
+  },
+  "repository": "git@github.com:Kenzie-Academy-Brasil-Developers/-controle-de-projetos-kenzievelopers-sp3-m4_Sandra.git",
+  "author": "SandraMatos9 <matos.sandrarodrigues@email.com>"
 }
