@@ -14,12 +14,11 @@ const registerNewTechProject = async (
   request: Request,
   response: Response
 ): Promise<Response> => {
-//   const techProjectData: TTechProject = request.body;
-console.log("teste")
+  //   const techProjectData: TTechProject = request.body;
+  console.log("teste");
   const projectId: number = parseInt(request.params.id);
-  console.log(projectId)
-  const technologyId = response.locals.technologies
-
+  console.log(projectId);
+  const technologyId = response.locals.technologies;
 
   const queryString: string = ` 
     INSERT INTO
@@ -30,10 +29,10 @@ console.log("teste")
     
     RETURNING *;
   
-    `
+    `;
   const queryConfigSelect: QueryConfig = {
     text: queryString,
-    values: [technologyId, projectId,new Date()],
+    values: [technologyId, projectId, new Date()],
   };
 
   const queryResult: QueryResult = await client.query(queryConfigSelect);
@@ -43,16 +42,14 @@ console.log("teste")
       message: "Technologie already exists in this project",
     });
   }
-  const queryStringInsert: string = 
-    `
+  const queryStringInsert: string = `
     INSERT INTO 
       projects_technologies(%I)
     VALUES(%L)
     RETURNING*;
    
-    `
-   
-  ;
+    `;
+
   const queryResultInsert: QueryResult = await client.query(queryStringInsert);
 
   return response.status(201).json(queryResultInsert.rows[0]);
@@ -127,15 +124,51 @@ const updateProject = async (
   request: Request,
   response: Response
 ): Promise<Response> => {
-  return response.status(201).json("funcionou");
+  const id: number = parseInt(request.params.id);
+  const updateProjectData: Partial<TProjectRequest> = request.body;
+
+  if (updateProjectData.developerId) {
+    delete updateProjectData.developerId;
+  }
+  const queryString: string = format(
+    `
+  UPDATE
+    projects
+  SET(%I)=ROW(%L)
+  WHERE
+    "developerId"=$1
+  RETURNING*;
+  `,
+    Object.keys(updateProjectData),
+    Object.values(updateProjectData)
+  );
+  const queryConfig: QueryConfig = {
+    text: queryString,
+    values: [id],
+  };
+  const queryResult: QueryResult<TProject> = await client.query(queryConfig);
+  return response.json(queryResult.rows[0]);
 };
 
-const deleteProject = async (
-  request: Request,
+const deleteProject = async (  request: Request,
   response: Response
 ): Promise<Response> => {
-  return response.status(201).json("funcionou");
-};
+  const { developerId, technologyId } = request.params;
+
+  const queryString: string = `
+    DELETE  FROM
+        projects
+    WHERE
+        "developerId" =$1;
+    `;
+  const queryConfig: QueryConfig = {
+    text: queryString,
+    values: [developerId],
+  };
+  await client.query(queryConfig);
+
+  return response.status(204).send();
+}
 
 const deletTechProject = async (
   request: Request,
@@ -161,5 +194,7 @@ export {
   createNewProject,
   registerNewTechProject,
   listProjectId,
+  updateProject,
   deletTechProject,
+  deleteProject
 };

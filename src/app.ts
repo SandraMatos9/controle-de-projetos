@@ -3,7 +3,7 @@ import "dotenv/config";
 import { startDatabase } from "./database";
 import { createDeveloper, createDeveloperInfo, deleteDeveloper, listAllDeveloperInfo, updateDeveloper } from "./logics/developers.logic";
 import { emailDeveloperExistsMiddleware, idDeveloperExistsMiddleware } from "./middleware/developers.middleware";
-import { createNewProject, registerNewTechProject } from "./logics/projects.logic";
+import { createNewProject, deletTechProject, deleteProject, listProjectId, registerNewTechProject, updateProject } from "./logics/projects.logic";
 import { nameTechnologieExistsMiddleware, technologieExistsMiddleware } from "./middleware/projects.middleware";
 
 const app: Application = express();
@@ -30,13 +30,13 @@ app.delete('/developers/:id',idDeveloperExistsMiddleware, deleteDeveloper)
 app.post('/projects',createNewProject)
 //Listar um projeto pelo id  
 app.post('/projects/:id/technologies',technologieExistsMiddleware,nameTechnologieExistsMiddleware,registerNewTechProject)
-app.get('/projects/:id')
+app.get('/projects/:id',listProjectId)
 //Atualizar um projeto    
-app.patch('/projects/:id')
+app.patch('/projects/:id',idDeveloperExistsMiddleware,updateProject)
 //Excluir um projeto  
-app.delete('/projects/:id/technologies')
+app.delete('/projects/:id/technologies',deleteProject)
 //Deletar uma tecnologia de um projeto  
-app.delete('/projects/:id/technologies/:name')
+app.delete('/projects/:id/technologies/:name',deletTechProject)
 
 
 app.listen(3000, async() =>{
