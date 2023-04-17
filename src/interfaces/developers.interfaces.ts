@@ -6,8 +6,9 @@ type TDevelopers={
 
 type TDevelopersInfo={
     id: number
-    name: string
-    email: string
+    developerSince:number
+    preferredOS:string
+    developerId: number
 }
 
 type TDevelopersRequest= Omit<TDevelopers,"id">

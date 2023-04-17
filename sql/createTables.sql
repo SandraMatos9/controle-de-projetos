@@ -1,12 +1,46 @@
 create table if not exists developers(
 	"id" SERIAL primary key,
 	"name" VARCHAR(50) not null,
-	"email" VARCHAR(50) unique not null
+	"email"  VARCHAR(50) unique not null
 );
 
 create table if not exists developer_infos(
-"id" SERIAL primary key,
-"developerSince" date not null,
-"developerId" INTEGER unique not null,
-FOREIGN key("developerId") references developers("id")
+	"id" SERIAL primary key,
+	"developerSince" DATE not null,
+	preferredOS "OS" not null,
+	"developerId" INTEGER unique not null,
+	FOREIGN key("developerId") references developers("id")
+);
+
+DROP TYPE IF EXISTS ENUM;
+
+create type "OS" as ENUM(
+	'Windows', 'Linux' , 'MacOS'
+);
+
+
+create table if not exists projects(
+	"id"  SERIAL primary key,
+	"name" VARCHAR(50)not null,
+	"description" VARCHAR,
+	"estimatedTime" VARCHAR(20) not null,
+	"repository" VARCHAR (120) not null,
+	"startDate" DATE not null,
+	"endDate" DATE,
+	"developerId" INTEGER unique not null,
+	FOREIGN key("developerId") references developers("id")
+);
+
+create table if not exists technologies(
+	"id"  SERIAL primary key,
+	"name" VARCHAR(30)not null
+);
+
+create table if not exists projects_technologies(
+	"id" SERIAL primary key,
+	"addedIn" DATE not null,
+	"technologyId" INTEGER  not null,
+	"projectId" INTEGER not null,
+	FOREIGN KEY(technologyId) references technologies(id),
+	FOREIGN KEY(projectId) references projects(id)
 );

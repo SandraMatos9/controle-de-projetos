@@ -3,7 +3,41 @@ import { QueryConfig, QueryResult } from 'pg'
 import { client } from '../database'
 import { TDevelopers } from '../interfaces/developers.interfaces'
 
-const idDeveloperExistsMiddleware= async(
+const nameTechnologieExistsMiddleware= async(
+    request: Request,
+    response: Response,
+    next: NextFunction
+):Promise <Response|void> =>{
+    const name:string = request.body.name
+    const queryString: string = `
+    SELECT
+        *
+    FROM
+        technologies
+    WHERE
+        name = $1;
+`
+const queryConfig:QueryConfig ={
+    text: queryString,
+    values:[name],
+}
+
+const  queryResult:QueryResult<TDevelopers> = await client.query(queryConfig)
+
+if(queryResult.rowCount==0){
+    return response.status(404).json({
+        
+        message: "Technology not found."
+    })
+
+}
+response.locals.technologies=queryResult.rows[0].id
+
+
+return next()
+}
+
+const technologieExistsMiddleware= async(
     request: Request,
     response: Response,
     next: NextFunction
@@ -13,7 +47,7 @@ const idDeveloperExistsMiddleware= async(
     SELECT
         *
     FROM
-        developers
+        projects
     WHERE
         id = $1;
 `
@@ -23,47 +57,16 @@ const queryConfig:QueryConfig ={
 }
 
 const  queryResult:QueryResult<TDevelopers> = await client.query(queryConfig)
-
-if(queryResult.rowCount===0){
+console.log(queryResult)
+console.log(request.params.id)
+if(queryResult.rowCount==0){
     return response.status(404).json({
-        message: "Developer not found."
-    })
+    message: "TechProject not found",}
+    )
 
 }
-response.locals.developers=queryResult.rows[0]
+response.locals.projects=queryResult.rows[0].id
+console.log(response.locals.projects)
 return next()
 }
-
-
-const emailDeveloperExistsMiddleware= async(
-    request: Request,
-    response: Response,
-    next: NextFunction
-):Promise <Response|void> =>{
-    const email:string = request.body.email
-    const queryString: string = `
-    SELECT
-        *
-    FROM
-        developers
-    WHERE
-        email = $1;
-`
-const queryConfig:QueryConfig ={
-    text: queryString,
-    values:[email],
-}
-
-const  queryResult:QueryResult<TDevelopers> = await client.query(queryConfig)
-
-if(queryResult.rowCount>0){
-    return response.status(409).json({
-    message: "Email already exists.",
-       
-    })
-
-}
-response.locals.developers=queryResult.rows[0]
-return next()
-}
-export{idDeveloperExistsMiddleware,emailDeveloperExistsMiddleware}
+export{technologieExistsMiddleware,nameTechnologieExistsMiddleware}
