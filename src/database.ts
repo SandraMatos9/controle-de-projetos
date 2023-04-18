@@ -19,13 +19,7 @@ const config = () => {
     port: Number(process.env.DB_PORT!),
   };
 };
-const client:Client = new Client({
-  host:process.env.DB_HOST,
-  port:parseInt(process.env.DB_PORT!),
-  user:process.env.DB_USER,
-  password:process.env.DB_PASSWORD,
-  database:process.env.DB,
-});
+const client:Client = new Client( config());
 
 const startDatabase= async (): Promise<void> => {
   console.log(process.env.DB)

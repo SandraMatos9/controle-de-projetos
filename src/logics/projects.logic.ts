@@ -15,9 +15,9 @@ const registerNewTechProject = async (
   response: Response
 ): Promise<Response> => {
   //   const techProjectData: TTechProject = request.body;
-  console.log("teste");
+
   const projectId: number = parseInt(request.params.id);
-  console.log(projectId);
+
   const technologyId = response.locals.technologies;
 
   const queryString: string = ` 
@@ -62,9 +62,9 @@ const createNewProject = async (
   const projectData: TProjectRequest = request.body;
   const queryString: string = format(
     `INSERT INTO
-    projects(%I)
+      projects(%I)
     VALUES
-    (%L)
+      (%L)
     RETURNING *;
     `,
     Object.keys(projectData),
@@ -84,31 +84,34 @@ const listProjectId = async (
   const queryString: string = format(
     `
       SELECT
-        di.id "developerId",
-        dev.developerName": "Fabio",
-        dev.developerEmail": "fabio.senior@kenzie.com.br",
-        di.developerInfoDeveloperSince": "2013-01-01T02:00:00.000Z",
-        di.developerInfoPreferredOS": "MacOS"
+        di.id  AS "developerId",
+        dev."name" AS "developerName",
+        dev."email" AS "developerEmail",
+        di."developerInfo",
+        di."developerSince" AS "developerInfoDeveloperSince",
+        di."preferredOS" AS "developerInfoPreferredOS",
 
-        pro.projectId
-        pro.projectName
-        pro.projectDescription
-        pro.projectEstimatedTime
-        pro.projectRepository
-        pro.projectStartDate
-        pro.projectEndDate
-        pro.projectDeveloperId
-         technologyId (esse dado pode ser nulo)
-         technologyName (esse dado pode ser nulo)            
+        pro.id AS "projectId",
+        pro."name"  AS "projectName",
+        pro."description" AS "projectDescription",
+        pro."estimatedTime" AS "projectEstimatedTime",
+        pro."repository" AS "projectRepository",
+        pro."startDate" AS "projectStartDate",
+        pro."endDate" AS "projectEndDate",
+        pro."developerId" AS "projectDeveloperId",
+        tech.technologyId ,
+        tech.technologyName             
       FROM
         projects pro
-    JOIN
+      LEFT JOIN
         projects_technologies ptech ON pro."id"= ptech."projectId"
-    LEFT JOIN
+      FULL JOIN
         technologies tech ON pro."id"= ptech."technologyId"
-    WHERE
-        pro.id=1$;    
-    ;
+      FULL JOIN 
+        developer_infos di      
+      WHERE
+        pro.id=$1;    
+    
     `
   );
   const queryConfig: QueryConfig = {
@@ -136,7 +139,7 @@ const updateProject = async (
     projects
   SET(%I)=ROW(%L)
   WHERE
-    "developerId"=$1
+    "id"=$1
   RETURNING*;
   `,
     Object.keys(updateProjectData),
@@ -150,7 +153,8 @@ const updateProject = async (
   return response.json(queryResult.rows[0]);
 };
 
-const deleteProject = async (  request: Request,
+const deleteProject = async (
+  request: Request,
   response: Response
 ): Promise<Response> => {
   const { developerId, technologyId } = request.params;
@@ -168,23 +172,23 @@ const deleteProject = async (  request: Request,
   await client.query(queryConfig);
 
   return response.status(204).send();
-}
+};
 
 const deletTechProject = async (
   request: Request,
   response: Response
 ): Promise<Response> => {
-  const { developerId, technologyId } = request.params;
-
+  const { projectId } = request.params;
+  const technologyId: number = response.locals.technologies;
   const queryString: string = `
     DELETE  FROM
         projects_technologies
     WHERE
-        "developerId" =$1 AND "technologyId"=$2;
+        "projectId" =$1 AND "technologyId"=$2;
     `;
   const queryConfig: QueryConfig = {
     text: queryString,
-    values: [developerId, technologyId],
+    values: [projectId, technologyId],
   };
   await client.query(queryConfig);
 
@@ -196,5 +200,5 @@ export {
   listProjectId,
   updateProject,
   deletTechProject,
-  deleteProject
+  deleteProject,
 };

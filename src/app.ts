@@ -2,7 +2,7 @@ import express, { Application } from "express";
 import "dotenv/config";
 import { startDatabase } from "./database";
 import { createDeveloper, createDeveloperInfo, deleteDeveloper, listAllDeveloperInfo, updateDeveloper } from "./logics/developers.logic";
-import { emailDeveloperExistsMiddleware, idDeveloperExistsMiddleware } from "./middleware/developers.middleware";
+import { emailDeveloperExistsMiddleware, idBodyDeveloperExistsMiddleware, idDeveloperExistsMiddleware, informationDeveloperExistMiddleware } from "./middleware/developers.middleware";
 import { createNewProject, deletTechProject, deleteProject, listProjectId, registerNewTechProject, updateProject } from "./logics/projects.logic";
 import { nameTechnologieExistsMiddleware, technologieExistsMiddleware } from "./middleware/projects.middleware";
 
@@ -13,7 +13,7 @@ app.use(express.json())
 app.post('/developers',emailDeveloperExistsMiddleware,createDeveloper)
 
 //Cadastrar informações adicionais a um desenvolvedor tabela Developers
-app.post('/developers/:id/infos',idDeveloperExistsMiddleware,createDeveloperInfo)
+app.post('/developers/:id/infos',idDeveloperExistsMiddleware,informationDeveloperExistMiddleware,createDeveloperInfo)
 
 //Listar um desenvolvedor e seus projetos tabela Developers
 app.get('/developers/:id',idDeveloperExistsMiddleware,listAllDeveloperInfo)
@@ -27,21 +27,17 @@ app.delete('/developers/:id',idDeveloperExistsMiddleware, deleteDeveloper)
 
 ///////////////////////////////////////////////////////////
 //Cadastrar um novo projeto   
-app.post('/projects',createNewProject)
+app.post('/projects',idBodyDeveloperExistsMiddleware,createNewProject)
 //Listar um projeto pelo id  
 app.post('/projects/:id/technologies',technologieExistsMiddleware,nameTechnologieExistsMiddleware,registerNewTechProject)
 app.get('/projects/:id',listProjectId)
 //Atualizar um projeto    
 app.patch('/projects/:id',idDeveloperExistsMiddleware,updateProject)
 //Excluir um projeto  
-app.delete('/projects/:id/technologies',deleteProject)
+app.delete('/projects/:id',deleteProject)
 //Deletar uma tecnologia de um projeto  
-app.delete('/projects/:id/technologies/:name',deletTechProject)
+app.delete('/projects/:id/technologies/:name',nameTechnologieExistsMiddleware,technologieExistsMiddleware,deletTechProject)
 
 
-app.listen(3000, async() =>{
-    await startDatabase()
-    console.log('Server is running')
-})
 
 export default app;

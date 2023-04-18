@@ -8,7 +8,7 @@ const nameTechnologieExistsMiddleware= async(
     response: Response,
     next: NextFunction
 ):Promise <Response|void> =>{
-    const name:string = request.body.name
+    const name:string = request.params.name
     const queryString: string = `
     SELECT
         *
@@ -57,8 +57,7 @@ const queryConfig:QueryConfig ={
 }
 
 const  queryResult:QueryResult<TDevelopers> = await client.query(queryConfig)
-console.log(queryResult)
-console.log(request.params.id)
+
 if(queryResult.rowCount==0){
     return response.status(404).json({
     message: "TechProject not found",}
@@ -66,7 +65,7 @@ if(queryResult.rowCount==0){
 
 }
 response.locals.projects=queryResult.rows[0].id
-console.log(response.locals.projects)
+
 return next()
 }
 export{technologieExistsMiddleware,nameTechnologieExistsMiddleware}
