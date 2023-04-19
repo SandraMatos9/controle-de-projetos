@@ -190,9 +190,7 @@ const deleteProject = async (
   request: Request,
   response: Response
 ): Promise<Response> => {
-  // const { id } = request.params;
-  const id = response.locals.projectId
-  console.log(id)
+  const id = request.params.id
 
   const queryString: string = `
     DELETE FROM
@@ -213,8 +211,10 @@ const deletTechProject = async (
   request: Request,
   response: Response
 ): Promise<Response> => {
-  const { projectId } = request.params;
-  const technologyId: number = response.locals.technologies;
+
+  // const { projectId } = request.params;
+  const id = request.params.id
+  const technologyId = response.locals.technologiesId;
   const queryString: string = `
     DELETE  FROM
         projects_technologies
@@ -225,7 +225,7 @@ const deletTechProject = async (
     `;
   const queryConfig: QueryConfig = {
     text: queryString,
-    values: [projectId, technologyId],
+    values: [id, technologyId],
   };
 
   const queryResult = await client.query(queryConfig);

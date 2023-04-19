@@ -36,7 +36,7 @@ app.patch('/projects/:id',projectsExistsMiddleware,idDeveloperProjectsExistsMidd
 //Excluir um projeto  
 app.delete('/projects/:id',projectsExistsMiddleware,deleteProject)
 //Deletar uma tecnologia de um projeto  
-app.delete('/projects/:id/technologies/:name',nameParamsTechnologieExistsMiddleware,deletTechProject)
+app.delete('/projects/:id/technologies/:name',projectsExistsMiddleware,nameParamsTechnologieExistsMiddleware,deletTechProject)
 
 
 //
