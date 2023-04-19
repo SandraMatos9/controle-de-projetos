@@ -59,7 +59,7 @@ if(queryResult.rowCount===0){
     })
 
 }
-// response.locals.developers=queryResult.rows[0]
+response.locals.developers=queryResult.rows[0]
 return next()
 }
 

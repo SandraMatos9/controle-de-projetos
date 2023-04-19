@@ -8,7 +8,7 @@ const nameTechnologieExistsMiddleware= async(
     response: Response,
     next: NextFunction
 ):Promise <Response|void> =>{
-    const name:string = request.params.name
+    const name:string = request.body.name
     const queryString: string = `
     SELECT
         *
@@ -25,19 +25,94 @@ const queryConfig:QueryConfig ={
 const  queryResult:QueryResult<TDevelopers> = await client.query(queryConfig)
 
 if(queryResult.rowCount==0){
-    return response.status(404).json({
-        
-        message: "Technology not found."
-    })
+    return response.status(400).json({
+        "message": "Technology not supported.",
+        "options": [
+          "JavaScript",
+          "Python",
+          "React",
+          "Express.js",
+          "HTML",
+          "CSS",
+          "Django",
+          "PostgreSQL",
+          "MongoDB"
+        ]
+      })
 
 }
-response.locals.technologies=queryResult.rows[0].id
+response.locals.technologiesId=queryResult.rows[0].id
 
 
 return next()
 }
 
-const technologieExistsMiddleware= async(
+const nameParamsTechnologieExistsMiddleware= async(
+    request: Request,
+    response: Response,
+    next: NextFunction
+):Promise <Response|void> =>{
+    const name:string = request.params.name
+    const projectId: number = parseInt(request.params.id);
+    const technologyId = response.locals.technologiesId;
+    const queryString: string = `
+    SELECT
+        *
+    FROM
+        technologies
+    WHERE
+        name = $1;
+`
+const queryStringNameTechExist = await client.query(`
+    SELECT
+        *
+    FROM
+    projects_technologies
+    WHERE
+    (  projects_technologies."projectId" = $1 AND  projects_technologies."technologyId" = $2 );
+`, [projectId,technologyId])
+
+
+
+
+if (queryStringNameTechExist.rowCount > 0) {
+return response.status(400).json({
+message: "Technologie already exists in this project",
+});
+}
+
+
+const queryConfig:QueryConfig ={
+    text: queryString,
+    values:[name],
+}
+
+const  queryResult:QueryResult<TDevelopers> = await client.query(queryConfig)
+
+if(queryResult.rowCount===0){
+    return response.status(400).json({
+        "message": "Technology not supported.",
+        "options": [
+          "JavaScript",
+          "Python",
+          "React",
+          "Express.js",
+          "HTML",
+          "CSS",
+          "Django",
+          "PostgreSQL",
+          "MongoDB"
+        ]
+      })
+
+}
+response.locals.technologiesId=queryResult.rows[0].id
+
+
+return next()
+}
+
+const projectsExistsMiddleware= async(
     request: Request,
     response: Response,
     next: NextFunction
@@ -56,16 +131,73 @@ const queryConfig:QueryConfig ={
     values:[id],
 }
 
-const  queryResult:QueryResult<TDevelopers> = await client.query(queryConfig)
+const queryResult:QueryResult<TDevelopers> = await client.query(queryConfig)
 
-if(queryResult.rowCount==0){
+if(queryResult.rowCount===0){
     return response.status(404).json({
-    message: "TechProject not found",}
+    message: "Project not found.",}
     )
 
 }
-response.locals.projects=queryResult.rows[0].id
 
 return next()
 }
-export{technologieExistsMiddleware,nameTechnologieExistsMiddleware}
+
+const idDeveloperProjectsExistsMiddleware= async(
+    request: Request,
+    response: Response,
+    next: NextFunction
+):Promise <Response|void> =>{
+    const id = request.body.developerId
+    console.log(id)
+    const queryString: string = `
+    SELECT
+        *
+    FROM
+        developers
+    WHERE
+        id = $1;
+`
+const queryConfig:QueryConfig ={
+    text: queryString,
+    values:[id],
+}
+
+const  queryResult:QueryResult<TDevelopers> = await client.query(queryConfig)
+if(queryResult.rowCount===0){
+    return response.status(404).json({
+        message: "Developer not found."
+    })
+
+}
+// response.locals.developers=queryResult.rows[0]
+return next()
+}
+
+const techAlreadyExists= async(
+    request: Request,
+    response: Response,
+    next: NextFunction
+):Promise <Response|void> =>{
+    const projectId: number = parseInt(request.params.id);
+const technologyId = response.locals.technologiesId;
+    const techAlreadyExists= await client.query(`
+
+    SELECT  * FROM
+    projects_technologies
+    WHERE
+    (  projects_technologies."projectId" = $1 AND  projects_technologies."technologyId" = $2 );
+
+ `,[projectId,technologyId]
+ ) 
+ if (techAlreadyExists.rowCount > 0) {
+  return response.status(409).json({
+    message: "Technologie already exists in this project",
+  });
+}
+
+
+
+
+}
+export{projectsExistsMiddleware,nameTechnologieExistsMiddleware,idDeveloperProjectsExistsMiddleware,nameParamsTechnologieExistsMiddleware,techAlreadyExists}

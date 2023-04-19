@@ -35,7 +35,6 @@ const createDeveloperInfo = async (
   request: Request,
   response: Response
 ): Promise<Response> => {
-  console.log("teste create");
   const infoDevelopersData: TDevelopersInfo = request.body;
   // infoDevelopersData.id=parseInt(request.params.id)
   const newObject = {
@@ -73,7 +72,6 @@ const listAllDeveloperInfo = async (
   response: Response
 ): Promise<Response> => {
   const id: number = parseInt(request.params.id);
-  console.log(id);
   const queryString: string = 
    
     `
@@ -97,7 +95,6 @@ const listAllDeveloperInfo = async (
     values: [id],
   };
   const queryResult: QueryResult<TDevelopers> = await client.query(queryConfig);
-  console.log(queryResult.rows);
   return response.json(queryResult.rows[0]);
 };
 
@@ -132,7 +129,6 @@ const updateDeveloper = async (
   const queryResult: QueryResult<TDevelopersInfo> = await client.query(
     queryConfig
   );
-  console.log(queryResult)
   return response.json(queryResult.rows[0]);
 };
 
